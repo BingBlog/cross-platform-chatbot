@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@chatbot/shared": ["./packages/shared/src"],
+      "@chatbot/shared/*": ["./packages/shared/src/*"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*",
+    "packages/*/index.ts",
+    "packages/*/index.js"
+  ],
+  "exclude": ["node_modules", "dist", "build", "release"],
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/backend" },
+    { "path": "./packages/web" },
+    { "path": "./packages/desktop" },
+    { "path": "./packages/mobile" }
+  ]
+}

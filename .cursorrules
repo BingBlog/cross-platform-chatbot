@@ -1,0 +1,157 @@
+# Cross-Platform AI Chatbot - Cursor Rules
+
+## Project Overview
+
+Cross-platform AI Chatbot supporting desktop (Electron), mobile (React Native), and web (React) with 80%+ code reuse through shared code layer.
+
+## Architecture
+
+6-layer architecture: Client → Platform Adapter → Shared Code → Backend → Data → External Services
+
+## Tech Stack
+
+- Frontend: React 18+, TypeScript 5.0+, Tailwind CSS
+- Cross-platform: React Native 0.72+, Electron 28+
+- Backend: Node.js 20+, Koa.js 2.14+, TypeScript
+- Database: PostgreSQL 15+, Redis 7+, Prisma 5.0+
+- AI: QWEN API with streaming responses
+- State: Zustand + React Query
+
+## Project Structure
+
+```
+packages/
+├── shared/          # 80%+ reusable code
+│   ├── business/    # Business logic
+│   ├── models/      # Data models
+│   ├── api/         # API client
+│   ├── ai/          # AI integration
+│   ├── state/       # State management
+│   ├── components/  # UI components
+│   └── utils/       # Utilities
+├── desktop/         # Electron app
+├── mobile/          # React Native app
+├── web/             # React web app
+└── backend/         # Node.js services
+```
+
+## Core Rules
+
+### Code Organization
+
+- Place common logic in `packages/shared/`
+- Use platform adapters for platform-specific code
+- Follow single responsibility principle
+- Maximize code reuse across platforms
+
+### TypeScript Standards
+
+- Use strict TypeScript configuration
+- Define interfaces for all data structures
+- Avoid `any` type, use proper typing
+- Use generics for reusable components
+
+### Component Development
+
+- Build with atomic design principles
+- Ensure cross-platform UI consistency
+- Follow WCAG 2.1 AA accessibility standards
+- Use React.memo, useMemo, useCallback for performance
+
+### State Management
+
+- Use Zustand for global state
+- Use React Query for server state
+- Never mutate state directly
+- Implement state persistence for critical data
+
+### File Naming
+
+- Components: PascalCase (`MessageBubble.tsx`)
+- Utilities: camelCase (`dateUtils.ts`)
+- Types: camelCase with `.types.ts` suffix
+- Constants: UPPER_SNAKE_CASE
+- Services: camelCase with `.service.ts` suffix
+
+### Import/Export
+
+- Prefer named exports over default exports
+- Use barrel exports (index.ts files)
+- Use absolute imports from src root
+- Order: External libraries → Internal modules → Relative imports
+
+### API Integration
+
+- Use shared API client for all requests
+- Implement consistent error handling
+- Use interceptors for auth, logging, caching
+- Define API response types
+
+### AI Integration
+
+- Use QWEN API for AI responses
+- Implement real-time streaming
+- Maintain conversation context
+- Handle AI service errors gracefully
+
+### Testing
+
+- Write unit tests for business logic
+- Test UI components with Testing Library
+- Write integration tests for API and state
+- Test complete user workflows
+
+### Performance
+
+- Use code splitting and lazy loading
+- Implement virtual lists for large datasets
+- Use appropriate caching strategies
+- Optimize for each platform's constraints
+
+### Security
+
+- Validate all user inputs
+- Use JWT tokens for authentication
+- Encrypt sensitive data
+- Implement content filtering for AI responses
+
+### Platform-Specific
+
+- Desktop: Handle system operations in main process
+- Mobile: Use `.ios.ts` and `.android.ts` extensions
+- Web: Ensure cross-browser compatibility
+
+### Error Handling
+
+- Implement React error boundaries
+- Use consistent error response format
+- Provide clear error messages to users
+- Log errors for debugging
+
+### Git Workflow
+
+- Create feature branches for development
+- Use conventional commit messages
+- Require code reviews for all changes
+- Maintain automated testing and deployment
+
+## Best Practices
+
+1. Follow the layered architecture
+2. Maximize code reuse in shared package
+3. Use TypeScript strictly
+4. Optimize for performance from the start
+5. Make the app accessible to all users
+6. Write comprehensive tests
+7. Implement security best practices
+8. Monitor application health and performance
+
+## Getting Started
+
+1. `git clone <repository-url>`
+2. `pnpm install`
+3. Copy `.env.example` to `.env.local`
+4. `pnpm dev`
+5. Check `docs/` folder for detailed guides
+
+Remember: This is a cross-platform project with high code reuse. Always consider how changes affect all platforms and maintain consistency.
