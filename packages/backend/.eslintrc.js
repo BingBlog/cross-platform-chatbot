@@ -1,13 +1,25 @@
 module.exports = {
-  extends: ['../../.eslintrc.js'],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 2022,
+    sourceType: 'module',
+    project: './tsconfig.json',
+  },
+  plugins: ['@typescript-eslint'],
+  extends: [
+    'eslint:recommended',
+    '@typescript-eslint/recommended',
+  ],
+  root: true,
   env: {
     node: true,
-    browser: false,
+    jest: true,
   },
+  ignorePatterns: ['.eslintrc.js', 'dist/', 'node_modules/'],
   rules: {
-    // Backend specific rules
-    'no-console': 'off', // Allow console in backend
-    '@typescript-eslint/no-explicit-any': 'warn', // More lenient for external APIs
-    '@typescript-eslint/explicit-function-return-type': 'warn',
+    '@typescript-eslint/no-explicit-any': 'warn',
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'prefer-const': 'error',
+    'no-var': 'error',
   },
 };
