@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { swaggerSpec } from '../src/config/swagger.js';
+import { swaggerSpec } from '../src/config/swagger-complete.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

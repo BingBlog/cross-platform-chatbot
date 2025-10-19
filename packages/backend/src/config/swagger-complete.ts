@@ -1,0 +1,722 @@
+import swaggerJSDoc from 'swagger-jsdoc';
+import { SwaggerDefinition } from 'swagger-jsdoc';
+
+const swaggerDefinition: SwaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'Cross-Platform AI Chatbot API',
+    version: '1.0.0',
+    description:
+      'API documentation for the Cross-Platform AI Chatbot supporting desktop, mobile, and web clients',
+    contact: {
+      name: 'API Support',
+      email: 'support@chatbot.com',
+    },
+    license: {
+      name: 'MIT',
+      url: 'https://opensource.org/licenses/MIT',
+    },
+  },
+  servers: [
+    {
+      url: 'http://localhost:3001/api',
+      description: 'Development server',
+    },
+    {
+      url: 'https://api.chatbot.com/api',
+      description: 'Production server',
+    },
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'JWT token for authentication',
+      },
+    },
+    schemas: {
+      // ==================== 基础响应类型 ====================
+      ApiResponse: {
+        type: 'object',
+        properties: {
+          success: {
+            type: 'boolean',
+            description: 'Indicates if the request was successful',
+          },
+          message: { type: 'string', description: 'Response message' },
+          data: { type: 'object', description: 'Response data' },
+          error: { type: 'string', description: 'Error message if any' },
+          timestamp: {
+            type: 'string',
+            format: 'date-time',
+            description: 'Response timestamp',
+          },
+        },
+        required: ['success', 'message', 'timestamp'],
+      },
+      PaginatedResponse: {
+        allOf: [
+          { $ref: '#/components/schemas/ApiResponse' },
+          {
+            type: 'object',
+            properties: {
+              pagination: {
+                type: 'object',
+                properties: {
+                  page: { type: 'integer', minimum: 1 },
+                  limit: { type: 'integer', minimum: 1, maximum: 100 },
+                  total: { type: 'integer', minimum: 0 },
+                  totalPages: { type: 'integer', minimum: 0 },
+                  hasNext: { type: 'boolean' },
+                  hasPrev: { type: 'boolean' },
+                  nextPage: { type: 'integer' },
+                  prevPage: { type: 'integer' },
+                },
+                required: [
+                  'page',
+                  'limit',
+                  'total',
+                  'totalPages',
+                  'hasNext',
+                  'hasPrev',
+                ],
+              },
+            },
+            required: ['pagination'],
+          },
+        ],
+      },
+      ValidationError: {
+        type: 'object',
+        properties: {
+          field: { type: 'string' },
+          message: { type: 'string' },
+          value: { type: 'string' },
+        },
+        required: ['field', 'message'],
+      },
+      ApiError: {
+        type: 'object',
+        properties: {
+          code: { type: 'string' },
+          message: { type: 'string' },
+          details: { type: 'object' },
+          statusCode: { type: 'integer' },
+        },
+        required: ['code', 'message', 'statusCode'],
+      },
+
+      // ==================== 枚举类型 ====================
+      MessageRole: {
+        type: 'string',
+        enum: ['USER', 'ASSISTANT', 'SYSTEM'],
+        description: 'Message role type',
+      },
+      ContentType: {
+        type: 'string',
+        enum: ['TEXT', 'MARKDOWN', 'CODE', 'IMAGE', 'FILE', 'JSON'],
+        description: 'Content type',
+      },
+
+      // ==================== 用户相关类型 ====================
+      User: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'cuid' },
+          email: { type: 'string', format: 'email' },
+          username: { type: 'string', minLength: 3, maxLength: 50 },
+          avatar: { type: 'string', format: 'uri' },
+          firstName: { type: 'string', maxLength: 50 },
+          lastName: { type: 'string', maxLength: 50 },
+          bio: { type: 'string', maxLength: 500 },
+          isActive: { type: 'boolean' },
+          isEmailVerified: { type: 'boolean' },
+          emailVerifiedAt: { type: 'string', format: 'date-time' },
+          lastLoginAt: { type: 'string', format: 'date-time' },
+          loginCount: { type: 'integer', minimum: 0 },
+          preferences: { type: 'object' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+        required: [
+          'id',
+          'email',
+          'username',
+          'isActive',
+          'isEmailVerified',
+          'createdAt',
+          'updatedAt',
+        ],
+      },
+      CreateUserRequest: {
+        type: 'object',
+        properties: {
+          email: { type: 'string', format: 'email' },
+          username: { type: 'string', minLength: 3, maxLength: 50 },
+          password: { type: 'string', minLength: 8, maxLength: 128 },
+          firstName: { type: 'string', maxLength: 50 },
+          lastName: { type: 'string', maxLength: 50 },
+        },
+        required: ['email', 'username', 'password'],
+      },
+      UpdateUserRequest: {
+        type: 'object',
+        properties: {
+          username: { type: 'string', minLength: 3, maxLength: 50 },
+          firstName: { type: 'string', maxLength: 50 },
+          lastName: { type: 'string', maxLength: 50 },
+          bio: { type: 'string', maxLength: 500 },
+          avatar: { type: 'string', format: 'uri' },
+        },
+      },
+      UserSettings: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'cuid' },
+          userId: { type: 'string', format: 'cuid' },
+          theme: { type: 'string', enum: ['light', 'dark', 'auto'] },
+          language: { type: 'string' },
+          fontSize: { type: 'integer', minimum: 12, maximum: 24 },
+          enableNotifications: { type: 'boolean' },
+          enableSound: { type: 'boolean' },
+          autoSave: { type: 'boolean' },
+          defaultAiModel: { type: 'string' },
+          apiSettings: { type: 'object' },
+          uiPreferences: { type: 'object' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+        required: [
+          'id',
+          'userId',
+          'theme',
+          'language',
+          'fontSize',
+          'enableNotifications',
+          'enableSound',
+          'autoSave',
+          'createdAt',
+          'updatedAt',
+        ],
+      },
+      UpdateUserSettingsRequest: {
+        type: 'object',
+        properties: {
+          theme: { type: 'string', enum: ['light', 'dark', 'auto'] },
+          language: { type: 'string' },
+          fontSize: { type: 'integer', minimum: 12, maximum: 24 },
+          enableNotifications: { type: 'boolean' },
+          enableSound: { type: 'boolean' },
+          autoSave: { type: 'boolean' },
+          defaultAiModel: { type: 'string' },
+          apiSettings: { type: 'object' },
+          uiPreferences: { type: 'object' },
+        },
+      },
+
+      // ==================== 认证相关类型 ====================
+      LoginRequest: {
+        type: 'object',
+        properties: {
+          email: { type: 'string', format: 'email' },
+          password: { type: 'string' },
+        },
+        required: ['email', 'password'],
+      },
+      RegisterRequest: {
+        type: 'object',
+        properties: {
+          email: { type: 'string', format: 'email' },
+          username: { type: 'string', minLength: 3, maxLength: 50 },
+          password: { type: 'string', minLength: 8, maxLength: 128 },
+          firstName: { type: 'string', maxLength: 50 },
+          lastName: { type: 'string', maxLength: 50 },
+        },
+        required: ['email', 'username', 'password'],
+      },
+      LoginResponse: {
+        type: 'object',
+        properties: {
+          user: { $ref: '#/components/schemas/User' },
+          token: { type: 'string' },
+          refreshToken: { type: 'string' },
+          expiresIn: { type: 'integer' },
+        },
+        required: ['user', 'token', 'expiresIn'],
+      },
+      RefreshTokenRequest: {
+        type: 'object',
+        properties: {
+          refreshToken: { type: 'string' },
+        },
+        required: ['refreshToken'],
+      },
+      ChangePasswordRequest: {
+        type: 'object',
+        properties: {
+          currentPassword: { type: 'string' },
+          newPassword: { type: 'string', minLength: 8, maxLength: 128 },
+        },
+        required: ['currentPassword', 'newPassword'],
+      },
+
+      // ==================== 会话相关类型 ====================
+      ChatSession: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'cuid' },
+          userId: { type: 'string', format: 'cuid' },
+          title: { type: 'string', maxLength: 200 },
+          description: { type: 'string', maxLength: 1000 },
+          messageCount: { type: 'integer', minimum: 0 },
+          lastMessageAt: { type: 'string', format: 'date-time' },
+          isArchived: { type: 'boolean' },
+          isFavorite: { type: 'boolean' },
+          isPinned: { type: 'boolean' },
+          aiModel: { type: 'string' },
+          systemPrompt: { type: 'string' },
+          temperature: { type: 'number', minimum: 0, maximum: 2 },
+          maxTokens: { type: 'integer', minimum: 1, maximum: 4000 },
+          metadata: { type: 'object' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+        required: [
+          'id',
+          'userId',
+          'title',
+          'messageCount',
+          'isArchived',
+          'isFavorite',
+          'isPinned',
+          'createdAt',
+          'updatedAt',
+        ],
+      },
+      CreateSessionRequest: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', maxLength: 200 },
+          description: { type: 'string', maxLength: 1000 },
+          aiModel: { type: 'string' },
+          systemPrompt: { type: 'string' },
+          temperature: { type: 'number', minimum: 0, maximum: 2 },
+          maxTokens: { type: 'integer', minimum: 1, maximum: 4000 },
+        },
+        required: ['title'],
+      },
+      UpdateSessionRequest: {
+        type: 'object',
+        properties: {
+          title: { type: 'string', maxLength: 200 },
+          description: { type: 'string', maxLength: 1000 },
+          isArchived: { type: 'boolean' },
+          isFavorite: { type: 'boolean' },
+          isPinned: { type: 'boolean' },
+          aiModel: { type: 'string' },
+          systemPrompt: { type: 'string' },
+          temperature: { type: 'number', minimum: 0, maximum: 2 },
+          maxTokens: { type: 'integer', minimum: 1, maximum: 4000 },
+        },
+      },
+      SessionListQuery: {
+        type: 'object',
+        properties: {
+          page: { type: 'integer', minimum: 1, default: 1 },
+          limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+          search: { type: 'string' },
+          isArchived: { type: 'boolean' },
+          isFavorite: { type: 'boolean' },
+          isPinned: { type: 'boolean' },
+          sortBy: {
+            type: 'string',
+            enum: ['createdAt', 'updatedAt', 'lastMessageAt', 'title'],
+          },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+        },
+      },
+      SessionWithMessages: {
+        allOf: [
+          { $ref: '#/components/schemas/ChatSession' },
+          {
+            type: 'object',
+            properties: {
+              messages: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/Message' },
+              },
+              tags: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/SessionTag' },
+              },
+            },
+          },
+        ],
+      },
+
+      // ==================== 消息相关类型 ====================
+      Message: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'cuid' },
+          sessionId: { type: 'string', format: 'cuid' },
+          userId: { type: 'string', format: 'cuid' },
+          role: { $ref: '#/components/schemas/MessageRole' },
+          content: { type: 'string' },
+          contentType: { $ref: '#/components/schemas/ContentType' },
+          parentMessageId: { type: 'string', format: 'cuid' },
+          isEdited: { type: 'boolean' },
+          editHistory: { type: 'object' },
+          tokenCount: { type: 'integer', minimum: 0 },
+          processingTime: { type: 'integer', minimum: 0 },
+          metadata: { type: 'object' },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+        required: [
+          'id',
+          'sessionId',
+          'userId',
+          'role',
+          'content',
+          'contentType',
+          'isEdited',
+          'createdAt',
+          'updatedAt',
+        ],
+      },
+      CreateMessageRequest: {
+        type: 'object',
+        properties: {
+          content: { type: 'string', minLength: 1, maxLength: 10000 },
+          contentType: { $ref: '#/components/schemas/ContentType' },
+          parentMessageId: { type: 'string', format: 'cuid' },
+          metadata: { type: 'object' },
+        },
+        required: ['content'],
+      },
+      UpdateMessageRequest: {
+        type: 'object',
+        properties: {
+          content: { type: 'string', minLength: 1, maxLength: 10000 },
+          metadata: { type: 'object' },
+        },
+        required: ['content'],
+      },
+      MessageListQuery: {
+        type: 'object',
+        properties: {
+          page: { type: 'integer', minimum: 1, default: 1 },
+          limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+          sortBy: { type: 'string', enum: ['createdAt', 'updatedAt'] },
+          sortOrder: { type: 'string', enum: ['asc', 'desc'] },
+        },
+      },
+      MessageWithReplies: {
+        allOf: [
+          { $ref: '#/components/schemas/Message' },
+          {
+            type: 'object',
+            properties: {
+              replies: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/Message' },
+              },
+              attachments: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/MessageAttachment' },
+              },
+            },
+          },
+        ],
+      },
+
+      // ==================== AI 相关类型 ====================
+      AIResponse: {
+        type: 'object',
+        properties: {
+          content: { type: 'string' },
+          usage: {
+            type: 'object',
+            properties: {
+              promptTokens: { type: 'integer', minimum: 0 },
+              completionTokens: { type: 'integer', minimum: 0 },
+              totalTokens: { type: 'integer', minimum: 0 },
+            },
+          },
+          model: { type: 'string' },
+          processingTime: { type: 'integer', minimum: 0 },
+        },
+        required: ['content'],
+      },
+      SendMessageRequest: {
+        type: 'object',
+        properties: {
+          content: { type: 'string', minLength: 1, maxLength: 10000 },
+          contentType: { $ref: '#/components/schemas/ContentType' },
+          parentMessageId: { type: 'string', format: 'cuid' },
+          stream: { type: 'boolean', default: false },
+          metadata: { type: 'object' },
+        },
+        required: ['content'],
+      },
+      StreamMessageResponse: {
+        type: 'object',
+        properties: {
+          id: { type: 'string' },
+          content: { type: 'string' },
+          isComplete: { type: 'boolean' },
+          usage: {
+            type: 'object',
+            properties: {
+              promptTokens: { type: 'integer', minimum: 0 },
+              completionTokens: { type: 'integer', minimum: 0 },
+              totalTokens: { type: 'integer', minimum: 0 },
+            },
+          },
+          model: { type: 'string' },
+          processingTime: { type: 'integer', minimum: 0 },
+        },
+        required: ['id', 'content', 'isComplete'],
+      },
+
+      // ==================== 其他类型 ====================
+      MessageAttachment: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'cuid' },
+          messageId: { type: 'string', format: 'cuid' },
+          fileName: { type: 'string' },
+          fileType: { type: 'string' },
+          fileSize: { type: 'integer', minimum: 0 },
+          filePath: { type: 'string' },
+          mimeType: { type: 'string' },
+          isProcessed: { type: 'boolean' },
+          metadata: { type: 'object' },
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+        required: [
+          'id',
+          'messageId',
+          'fileName',
+          'fileType',
+          'fileSize',
+          'filePath',
+          'isProcessed',
+          'createdAt',
+        ],
+      },
+      SessionTag: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'cuid' },
+          userId: { type: 'string', format: 'cuid' },
+          sessionId: { type: 'string', format: 'cuid' },
+          tagName: { type: 'string' },
+          color: { type: 'string' },
+          createdAt: { type: 'string', format: 'date-time' },
+        },
+        required: ['id', 'userId', 'sessionId', 'tagName', 'createdAt'],
+      },
+      SearchRequest: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', minLength: 1 },
+          sessionId: { type: 'string', format: 'cuid' },
+          page: { type: 'integer', minimum: 1, default: 1 },
+          limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+          filters: {
+            type: 'object',
+            properties: {
+              dateRange: {
+                type: 'object',
+                properties: {
+                  start: { type: 'string', format: 'date-time' },
+                  end: { type: 'string', format: 'date-time' },
+                },
+              },
+              contentType: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/ContentType' },
+              },
+              role: {
+                type: 'array',
+                items: { $ref: '#/components/schemas/MessageRole' },
+              },
+            },
+          },
+        },
+        required: ['query'],
+      },
+      SearchResult: {
+        type: 'object',
+        properties: {
+          message: { $ref: '#/components/schemas/Message' },
+          session: { $ref: '#/components/schemas/ChatSession' },
+          score: { type: 'number', minimum: 0, maximum: 1 },
+          highlights: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+        required: ['message', 'session', 'score', 'highlights'],
+      },
+      SearchResponse: {
+        type: 'object',
+        properties: {
+          results: {
+            type: 'array',
+            items: { $ref: '#/components/schemas/SearchResult' },
+          },
+          total: { type: 'integer', minimum: 0 },
+          query: { type: 'string' },
+          processingTime: { type: 'integer', minimum: 0 },
+        },
+        required: ['results', 'total', 'query', 'processingTime'],
+      },
+      HealthCheckResponse: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', enum: ['ok', 'error'] },
+          timestamp: { type: 'string', format: 'date-time' },
+          version: { type: 'string' },
+          environment: { type: 'string' },
+          services: {
+            type: 'object',
+            properties: {
+              database: { type: 'string', enum: ['connected', 'disconnected'] },
+              redis: { type: 'string', enum: ['connected', 'disconnected'] },
+              ai: { type: 'string', enum: ['available', 'unavailable'] },
+            },
+          },
+          uptime: { type: 'integer', minimum: 0 },
+          memory: {
+            type: 'object',
+            properties: {
+              used: { type: 'integer', minimum: 0 },
+              total: { type: 'integer', minimum: 0 },
+              percentage: { type: 'number', minimum: 0, maximum: 100 },
+            },
+          },
+        },
+        required: [
+          'status',
+          'timestamp',
+          'version',
+          'environment',
+          'services',
+          'uptime',
+          'memory',
+        ],
+      },
+    },
+    responses: {
+      BadRequest: {
+        description: 'Bad request - validation error',
+        content: {
+          'application/json': {
+            schema: {
+              allOf: [
+                { $ref: '#/components/schemas/ApiResponse' },
+                {
+                  type: 'object',
+                  properties: {
+                    errors: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/ValidationError' },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      Unauthorized: {
+        description: 'Unauthorized - authentication required',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ApiResponse' },
+          },
+        },
+      },
+      Forbidden: {
+        description: 'Forbidden - insufficient permissions',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ApiResponse' },
+          },
+        },
+      },
+      NotFound: {
+        description: 'Resource not found',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ApiResponse' },
+          },
+        },
+      },
+      InternalServerError: {
+        description: 'Internal server error',
+        content: {
+          'application/json': {
+            schema: { $ref: '#/components/schemas/ApiResponse' },
+          },
+        },
+      },
+    },
+  },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+  tags: [
+    {
+      name: 'Authentication',
+      description: 'User authentication and authorization',
+    },
+    {
+      name: 'Users',
+      description: 'User management operations',
+    },
+    {
+      name: 'Chat Sessions',
+      description: 'Chat session management',
+    },
+    {
+      name: 'Messages',
+      description: 'Message operations',
+    },
+    {
+      name: 'AI',
+      description: 'AI integration and responses',
+    },
+    {
+      name: 'Settings',
+      description: 'User settings and preferences',
+    },
+    {
+      name: 'Search',
+      description: 'Search functionality',
+    },
+    {
+      name: 'System',
+      description: 'System health and monitoring',
+    },
+  ],
+};
+
+const options = {
+  definition: swaggerDefinition,
+  apis: [
+    './src/controllers/*.ts',
+    './src/routes/*.ts',
+    './src/middleware/*.ts',
+  ],
+};
+
+export const swaggerSpec = swaggerJSDoc(options);
+export default swaggerSpec;

@@ -185,6 +185,10 @@ export interface components {
         limit: number;
         total: number;
         totalPages: number;
+        hasNext: boolean;
+        hasPrev: boolean;
+        nextPage?: number;
+        prevPage?: number;
       };
     };
     ValidationError: {
@@ -192,6 +196,22 @@ export interface components {
       message: string;
       value?: string;
     };
+    ApiError: {
+      code: string;
+      message: string;
+      details?: Record<string, never>;
+      statusCode: number;
+    };
+    /**
+     * @description Message role type
+     * @enum {string}
+     */
+    MessageRole: 'USER' | 'ASSISTANT' | 'SYSTEM';
+    /**
+     * @description Content type
+     * @enum {string}
+     */
+    ContentType: 'TEXT' | 'MARKDOWN' | 'CODE' | 'IMAGE' | 'FILE' | 'JSON';
     User: {
       /** Format: cuid */
       id: string;
@@ -224,16 +244,71 @@ export interface components {
       firstName?: string;
       lastName?: string;
     };
+    UpdateUserRequest: {
+      username?: string;
+      firstName?: string;
+      lastName?: string;
+      bio?: string;
+      /** Format: uri */
+      avatar?: string;
+    };
+    UserSettings: {
+      /** Format: cuid */
+      id: string;
+      /** Format: cuid */
+      userId: string;
+      /** @enum {string} */
+      theme: 'light' | 'dark' | 'auto';
+      language: string;
+      fontSize: number;
+      enableNotifications: boolean;
+      enableSound: boolean;
+      autoSave: boolean;
+      defaultAiModel?: string;
+      apiSettings?: Record<string, never>;
+      uiPreferences?: Record<string, never>;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    UpdateUserSettingsRequest: {
+      /** @enum {string} */
+      theme?: 'light' | 'dark' | 'auto';
+      language?: string;
+      fontSize?: number;
+      enableNotifications?: boolean;
+      enableSound?: boolean;
+      autoSave?: boolean;
+      defaultAiModel?: string;
+      apiSettings?: Record<string, never>;
+      uiPreferences?: Record<string, never>;
+    };
     LoginRequest: {
       /** Format: email */
       email: string;
       password: string;
+    };
+    RegisterRequest: {
+      /** Format: email */
+      email: string;
+      username: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
     };
     LoginResponse: {
       user: components['schemas']['User'];
       token: string;
       refreshToken?: string;
       expiresIn: number;
+    };
+    RefreshTokenRequest: {
+      refreshToken: string;
+    };
+    ChangePasswordRequest: {
+      currentPassword: string;
+      newPassword: string;
     };
     ChatSession: {
       /** Format: cuid */
@@ -277,6 +352,24 @@ export interface components {
       temperature?: number;
       maxTokens?: number;
     };
+    SessionListQuery: {
+      /** @default 1 */
+      page: number;
+      /** @default 20 */
+      limit: number;
+      search?: string;
+      isArchived?: boolean;
+      isFavorite?: boolean;
+      isPinned?: boolean;
+      /** @enum {string} */
+      sortBy?: 'createdAt' | 'updatedAt' | 'lastMessageAt' | 'title';
+      /** @enum {string} */
+      sortOrder?: 'asc' | 'desc';
+    };
+    SessionWithMessages: components['schemas']['ChatSession'] & {
+      messages?: components['schemas']['Message'][];
+      tags?: components['schemas']['SessionTag'][];
+    };
     Message: {
       /** Format: cuid */
       id: string;
@@ -284,17 +377,9 @@ export interface components {
       sessionId: string;
       /** Format: cuid */
       userId: string;
-      /**
-       * @description Message role
-       * @enum {string}
-       */
-      role: 'USER' | 'ASSISTANT' | 'SYSTEM';
+      role: components['schemas']['MessageRole'];
       content: string;
-      /**
-       * @description Content type
-       * @enum {string}
-       */
-      contentType: 'TEXT' | 'MARKDOWN' | 'CODE' | 'IMAGE' | 'FILE' | 'JSON';
+      contentType: components['schemas']['ContentType'];
       /** Format: cuid */
       parentMessageId?: string;
       isEdited: boolean;
@@ -309,14 +394,28 @@ export interface components {
     };
     CreateMessageRequest: {
       content: string;
-      /**
-       * @default TEXT
-       * @enum {string}
-       */
-      contentType: 'TEXT' | 'MARKDOWN' | 'CODE' | 'IMAGE' | 'FILE' | 'JSON';
+      contentType?: components['schemas']['ContentType'];
       /** Format: cuid */
       parentMessageId?: string;
       metadata?: Record<string, never>;
+    };
+    UpdateMessageRequest: {
+      content: string;
+      metadata?: Record<string, never>;
+    };
+    MessageListQuery: {
+      /** @default 1 */
+      page: number;
+      /** @default 20 */
+      limit: number;
+      /** @enum {string} */
+      sortBy?: 'createdAt' | 'updatedAt';
+      /** @enum {string} */
+      sortOrder?: 'asc' | 'desc';
+    };
+    MessageWithReplies: components['schemas']['Message'] & {
+      replies?: components['schemas']['Message'][];
+      attachments?: components['schemas']['MessageAttachment'][];
     };
     AIResponse: {
       content: string;
@@ -328,37 +427,106 @@ export interface components {
       model?: string;
       processingTime?: number;
     };
-    UserSettings: {
+    SendMessageRequest: {
+      content: string;
+      contentType?: components['schemas']['ContentType'];
+      /** Format: cuid */
+      parentMessageId?: string;
+      /** @default false */
+      stream: boolean;
+      metadata?: Record<string, never>;
+    };
+    StreamMessageResponse: {
+      id: string;
+      content: string;
+      isComplete: boolean;
+      usage?: {
+        promptTokens?: number;
+        completionTokens?: number;
+        totalTokens?: number;
+      };
+      model?: string;
+      processingTime?: number;
+    };
+    MessageAttachment: {
+      /** Format: cuid */
+      id: string;
+      /** Format: cuid */
+      messageId: string;
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+      filePath: string;
+      mimeType?: string;
+      isProcessed: boolean;
+      metadata?: Record<string, never>;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    SessionTag: {
       /** Format: cuid */
       id: string;
       /** Format: cuid */
       userId: string;
-      /** @enum {string} */
-      theme: 'light' | 'dark' | 'auto';
-      language: string;
-      fontSize: number;
-      enableNotifications: boolean;
-      enableSound: boolean;
-      autoSave: boolean;
-      defaultAiModel?: string;
-      apiSettings?: Record<string, never>;
-      uiPreferences?: Record<string, never>;
+      /** Format: cuid */
+      sessionId: string;
+      tagName: string;
+      color?: string;
       /** Format: date-time */
       createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
     };
-    UpdateUserSettingsRequest: {
+    SearchRequest: {
+      query: string;
+      /** Format: cuid */
+      sessionId?: string;
+      /** @default 1 */
+      page: number;
+      /** @default 20 */
+      limit: number;
+      filters?: {
+        dateRange?: {
+          /** Format: date-time */
+          start?: string;
+          /** Format: date-time */
+          end?: string;
+        };
+        contentType?: components['schemas']['ContentType'][];
+        role?: components['schemas']['MessageRole'][];
+      };
+    };
+    SearchResult: {
+      message: components['schemas']['Message'];
+      session: components['schemas']['ChatSession'];
+      score: number;
+      highlights: string[];
+    };
+    SearchResponse: {
+      results: components['schemas']['SearchResult'][];
+      total: number;
+      query: string;
+      processingTime: number;
+    };
+    HealthCheckResponse: {
       /** @enum {string} */
-      theme?: 'light' | 'dark' | 'auto';
-      language?: string;
-      fontSize?: number;
-      enableNotifications?: boolean;
-      enableSound?: boolean;
-      autoSave?: boolean;
-      defaultAiModel?: string;
-      apiSettings?: Record<string, never>;
-      uiPreferences?: Record<string, never>;
+      status: 'ok' | 'error';
+      /** Format: date-time */
+      timestamp: string;
+      version: string;
+      environment: string;
+      services: {
+        /** @enum {string} */
+        database?: 'connected' | 'disconnected';
+        /** @enum {string} */
+        redis?: 'connected' | 'disconnected';
+        /** @enum {string} */
+        ai?: 'available' | 'unavailable';
+      };
+      uptime: number;
+      memory: {
+        used?: number;
+        total?: number;
+        percentage?: number;
+      };
     };
   };
   responses: {

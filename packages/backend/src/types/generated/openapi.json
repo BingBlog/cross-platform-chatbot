@@ -87,9 +87,28 @@
                   "totalPages": {
                     "type": "integer",
                     "minimum": 0
+                  },
+                  "hasNext": {
+                    "type": "boolean"
+                  },
+                  "hasPrev": {
+                    "type": "boolean"
+                  },
+                  "nextPage": {
+                    "type": "integer"
+                  },
+                  "prevPage": {
+                    "type": "integer"
                   }
                 },
-                "required": ["page", "limit", "total", "totalPages"]
+                "required": [
+                  "page",
+                  "limit",
+                  "total",
+                  "totalPages",
+                  "hasNext",
+                  "hasPrev"
+                ]
               }
             },
             "required": ["pagination"]
@@ -110,6 +129,34 @@
           }
         },
         "required": ["field", "message"]
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "object"
+          },
+          "statusCode": {
+            "type": "integer"
+          }
+        },
+        "required": ["code", "message", "statusCode"]
+      },
+      "MessageRole": {
+        "type": "string",
+        "enum": ["USER", "ASSISTANT", "SYSTEM"],
+        "description": "Message role type"
+      },
+      "ContentType": {
+        "type": "string",
+        "enum": ["TEXT", "MARKDOWN", "CODE", "IMAGE", "FILE", "JSON"],
+        "description": "Content type"
       },
       "User": {
         "type": "object",
@@ -211,6 +258,130 @@
         },
         "required": ["email", "username", "password"]
       },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "firstName": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "bio": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "avatar": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "UserSettings": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "cuid"
+          },
+          "theme": {
+            "type": "string",
+            "enum": ["light", "dark", "auto"]
+          },
+          "language": {
+            "type": "string"
+          },
+          "fontSize": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 24
+          },
+          "enableNotifications": {
+            "type": "boolean"
+          },
+          "enableSound": {
+            "type": "boolean"
+          },
+          "autoSave": {
+            "type": "boolean"
+          },
+          "defaultAiModel": {
+            "type": "string"
+          },
+          "apiSettings": {
+            "type": "object"
+          },
+          "uiPreferences": {
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "theme",
+          "language",
+          "fontSize",
+          "enableNotifications",
+          "enableSound",
+          "autoSave",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateUserSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "theme": {
+            "type": "string",
+            "enum": ["light", "dark", "auto"]
+          },
+          "language": {
+            "type": "string"
+          },
+          "fontSize": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 24
+          },
+          "enableNotifications": {
+            "type": "boolean"
+          },
+          "enableSound": {
+            "type": "boolean"
+          },
+          "autoSave": {
+            "type": "boolean"
+          },
+          "defaultAiModel": {
+            "type": "string"
+          },
+          "apiSettings": {
+            "type": "object"
+          },
+          "uiPreferences": {
+            "type": "object"
+          }
+        }
+      },
       "LoginRequest": {
         "type": "object",
         "properties": {
@@ -223,6 +394,34 @@
           }
         },
         "required": ["email", "password"]
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "username": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 50
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          },
+          "firstName": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "lastName": {
+            "type": "string",
+            "maxLength": 50
+          }
+        },
+        "required": ["email", "username", "password"]
       },
       "LoginResponse": {
         "type": "object",
@@ -241,6 +440,29 @@
           }
         },
         "required": ["user", "token", "expiresIn"]
+      },
+      "RefreshTokenRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string"
+          }
+        },
+        "required": ["refreshToken"]
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string"
+          },
+          "newPassword": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 128
+          }
+        },
+        "required": ["currentPassword", "newPassword"]
       },
       "ChatSession": {
         "type": "object",
@@ -386,6 +608,66 @@
           }
         }
       },
+      "SessionListQuery": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          },
+          "search": {
+            "type": "string"
+          },
+          "isArchived": {
+            "type": "boolean"
+          },
+          "isFavorite": {
+            "type": "boolean"
+          },
+          "isPinned": {
+            "type": "boolean"
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": ["createdAt", "updatedAt", "lastMessageAt", "title"]
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": ["asc", "desc"]
+          }
+        }
+      },
+      "SessionWithMessages": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSession"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/SessionTag"
+                }
+              }
+            }
+          }
+        ]
+      },
       "Message": {
         "type": "object",
         "properties": {
@@ -402,17 +684,13 @@
             "format": "cuid"
           },
           "role": {
-            "type": "string",
-            "enum": ["USER", "ASSISTANT", "SYSTEM"],
-            "description": "Message role"
+            "$ref": "#/components/schemas/MessageRole"
           },
           "content": {
             "type": "string"
           },
           "contentType": {
-            "type": "string",
-            "enum": ["TEXT", "MARKDOWN", "CODE", "IMAGE", "FILE", "JSON"],
-            "description": "Content type"
+            "$ref": "#/components/schemas/ContentType"
           },
           "parentMessageId": {
             "type": "string",
@@ -465,9 +743,7 @@
             "maxLength": 10000
           },
           "contentType": {
-            "type": "string",
-            "enum": ["TEXT", "MARKDOWN", "CODE", "IMAGE", "FILE", "JSON"],
-            "default": "TEXT"
+            "$ref": "#/components/schemas/ContentType"
           },
           "parentMessageId": {
             "type": "string",
@@ -478,6 +754,68 @@
           }
         },
         "required": ["content"]
+      },
+      "UpdateMessageRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "metadata": {
+            "type": "object"
+          }
+        },
+        "required": ["content"]
+      },
+      "MessageListQuery": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": ["createdAt", "updatedAt"]
+          },
+          "sortOrder": {
+            "type": "string",
+            "enum": ["asc", "desc"]
+          }
+        }
+      },
+      "MessageWithReplies": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Message"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "replies": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MessageAttachment"
+                }
+              }
+            }
+          }
+        ]
       },
       "AIResponse": {
         "type": "object",
@@ -512,7 +850,120 @@
         },
         "required": ["content"]
       },
-      "UserSettings": {
+      "SendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000
+          },
+          "contentType": {
+            "$ref": "#/components/schemas/ContentType"
+          },
+          "parentMessageId": {
+            "type": "string",
+            "format": "cuid"
+          },
+          "stream": {
+            "type": "boolean",
+            "default": false
+          },
+          "metadata": {
+            "type": "object"
+          }
+        },
+        "required": ["content"]
+      },
+      "StreamMessageResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "isComplete": {
+            "type": "boolean"
+          },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "promptTokens": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "completionTokens": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalTokens": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "model": {
+            "type": "string"
+          },
+          "processingTime": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["id", "content", "isComplete"]
+      },
+      "MessageAttachment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid"
+          },
+          "messageId": {
+            "type": "string",
+            "format": "cuid"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "filePath": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "isProcessed": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "messageId",
+          "fileName",
+          "fileType",
+          "fileSize",
+          "filePath",
+          "isProcessed",
+          "createdAt"
+        ]
+      },
+      "SessionTag": {
         "type": "object",
         "properties": {
           "id": {
@@ -523,92 +974,190 @@
             "type": "string",
             "format": "cuid"
           },
-          "theme": {
+          "sessionId": {
             "type": "string",
-            "enum": ["light", "dark", "auto"]
+            "format": "cuid"
           },
-          "language": {
+          "tagName": {
             "type": "string"
           },
-          "fontSize": {
-            "type": "integer",
-            "minimum": 12,
-            "maximum": 24
-          },
-          "enableNotifications": {
-            "type": "boolean"
-          },
-          "enableSound": {
-            "type": "boolean"
-          },
-          "autoSave": {
-            "type": "boolean"
-          },
-          "defaultAiModel": {
+          "color": {
             "type": "string"
-          },
-          "apiSettings": {
-            "type": "object"
-          },
-          "uiPreferences": {
-            "type": "object"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "required": ["id", "userId", "sessionId", "tagName", "createdAt"]
+      },
+      "SearchRequest": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1
           },
-          "updatedAt": {
+          "sessionId": {
+            "type": "string",
+            "format": "cuid"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          },
+          "filters": {
+            "type": "object",
+            "properties": {
+              "dateRange": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              },
+              "contentType": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ContentType"
+                }
+              },
+              "role": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MessageRole"
+                }
+              }
+            }
+          }
+        },
+        "required": ["query"]
+      },
+      "SearchResult": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "$ref": "#/components/schemas/Message"
+          },
+          "session": {
+            "$ref": "#/components/schemas/ChatSession"
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "highlights": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["message", "session", "score", "highlights"]
+      },
+      "SearchResponse": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "query": {
+            "type": "string"
+          },
+          "processingTime": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": ["results", "total", "query", "processingTime"]
+      },
+      "HealthCheckResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["ok", "error"]
+          },
+          "timestamp": {
             "type": "string",
             "format": "date-time"
+          },
+          "version": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "services": {
+            "type": "object",
+            "properties": {
+              "database": {
+                "type": "string",
+                "enum": ["connected", "disconnected"]
+              },
+              "redis": {
+                "type": "string",
+                "enum": ["connected", "disconnected"]
+              },
+              "ai": {
+                "type": "string",
+                "enum": ["available", "unavailable"]
+              }
+            }
+          },
+          "uptime": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "memory": {
+            "type": "object",
+            "properties": {
+              "used": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "percentage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            }
           }
         },
         "required": [
-          "id",
-          "userId",
-          "theme",
-          "language",
-          "fontSize",
-          "enableNotifications",
-          "enableSound",
-          "autoSave",
-          "createdAt",
-          "updatedAt"
+          "status",
+          "timestamp",
+          "version",
+          "environment",
+          "services",
+          "uptime",
+          "memory"
         ]
-      },
-      "UpdateUserSettingsRequest": {
-        "type": "object",
-        "properties": {
-          "theme": {
-            "type": "string",
-            "enum": ["light", "dark", "auto"]
-          },
-          "language": {
-            "type": "string"
-          },
-          "fontSize": {
-            "type": "integer",
-            "minimum": 12,
-            "maximum": 24
-          },
-          "enableNotifications": {
-            "type": "boolean"
-          },
-          "enableSound": {
-            "type": "boolean"
-          },
-          "autoSave": {
-            "type": "boolean"
-          },
-          "defaultAiModel": {
-            "type": "string"
-          },
-          "apiSettings": {
-            "type": "object"
-          },
-          "uiPreferences": {
-            "type": "object"
-          }
-        }
       }
     },
     "responses": {
@@ -708,6 +1257,10 @@
     {
       "name": "Settings",
       "description": "User settings and preferences"
+    },
+    {
+      "name": "Search",
+      "description": "Search functionality"
     },
     {
       "name": "System",

@@ -1,7 +1,7 @@
 import Koa from 'koa';
 import Router from '@koa/router';
 import { koaSwagger } from 'koa2-swagger-ui';
-import { swaggerSpec } from '../config/swagger';
+import { swaggerSpec } from '../config/swagger-complete';
 import { logger } from '../utils/logger';
 
 /**
