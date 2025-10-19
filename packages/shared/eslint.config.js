@@ -11,13 +11,12 @@ export default [
       parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
+        project: './tsconfig.json',
       },
       globals: {
         process: 'readonly',
         console: 'readonly',
         Buffer: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
         global: 'readonly',
         module: 'readonly',
         require: 'readonly',
@@ -28,11 +27,11 @@ export default [
       '@typescript-eslint': tseslint,
     },
     rules: {
+      ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'prefer-const': 'error',
       'no-var': 'error',
-      'no-console': 'off',
     },
   },
   {

@@ -2,7 +2,6 @@ import Koa from 'koa';
 import Router from '@koa/router';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
-import helmet from 'koa-helmet';
 import logger from 'koa-logger';
 import serve from 'koa-static';
 import dotenv from 'dotenv';
@@ -11,6 +10,7 @@ import { PrismaClient } from '@prisma/client';
 // import { errorHandler } from './middleware/errorHandler';
 // import { rateLimitMiddleware } from './middleware/rateLimit';
 import { logger as winstonLogger } from './utils/logger';
+import cspMiddleware from './middleware/csp';
 
 // Load environment variables
 dotenv.config();
@@ -19,13 +19,15 @@ const app = new Koa();
 const router = new Router();
 const prisma = new PrismaClient();
 
-// Security middleware
-app.use(helmet());
+// Security middleware with environment-specific CSP
+app.use(cspMiddleware());
 
 // CORS configuration
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://localhost:5173',
+    origin:
+      process.env.ALLOWED_ORIGINS ||
+      'http://localhost:3000,http://localhost:5173',
     credentials: true,
   })
 );
@@ -60,13 +62,13 @@ router.get('/health', async (ctx: any) => {
   try {
     // Test database connection
     await prisma.$queryRaw`SELECT 1`;
-    
+
     ctx.body = {
       status: 'ok',
       timestamp: new Date().toISOString(),
       version: '1.0.0',
       database: 'connected',
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
     };
   } catch (error) {
     ctx.status = 500;
@@ -74,7 +76,7 @@ router.get('/health', async (ctx: any) => {
       status: 'error',
       timestamp: new Date().toISOString(),
       database: 'disconnected',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 });
@@ -84,12 +86,12 @@ router.get('/test-db', async (ctx: any) => {
   try {
     // Test basic query
     const result = await prisma.$queryRaw`SELECT 1 as test`;
-    
+
     // Get table counts
     const userCount = await prisma.user.count();
     const sessionCount = await prisma.chatSession.count();
     const messageCount = await prisma.message.count();
-    
+
     ctx.body = {
       success: true,
       message: 'Database connection and queries successful',
@@ -98,16 +100,16 @@ router.get('/test-db', async (ctx: any) => {
         tableCounts: {
           users: userCount,
           sessions: sessionCount,
-          messages: messageCount
-        }
-      }
+          messages: messageCount,
+        },
+      },
     };
   } catch (error) {
     ctx.status = 500;
     ctx.body = {
       success: false,
       message: 'Database test failed',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 });
@@ -117,19 +119,27 @@ import authController from './controllers/authController';
 import chatController from './controllers/chatController';
 import sessionController from './controllers/sessionController';
 import userController from './controllers/userController';
+import exampleController from './controllers/exampleController';
+
+// Import Swagger middleware
+import swaggerRouter from './middleware/swagger';
 
 // API routes
 router.use('/api/auth', authController.routes());
 router.use('/api/chat', chatController.routes());
 router.use('/api/sessions', sessionController.routes());
 router.use('/api/users', userController.routes());
+router.use('/api/example', exampleController.routes());
+
+// Swagger documentation routes
+router.use('/api', swaggerRouter.routes());
 
 // Apply routes
 app.use(router.routes());
 app.use(router.allowedMethods());
 
 // Error handling for unhandled routes
-app.use(async (ctx) => {
+app.use(async ctx => {
   ctx.status = 404;
   ctx.body = {
     error: 'Not Found',
