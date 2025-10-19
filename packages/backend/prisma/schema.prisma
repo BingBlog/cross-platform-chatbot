@@ -10,55 +10,312 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ==================== 核心业务表 ====================
+
+// 用户表
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  username  String   @unique
-  password  String
-  avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String   @id @default(cuid())
+  email             String   @unique
+  username          String   @unique
+  password          String
+  avatar            String?
+  firstName         String?
+  lastName          String?
+  bio               String?
+  isActive          Boolean  @default(true)
+  isEmailVerified   Boolean  @default(false)
+  emailVerifiedAt   DateTime?
+  lastLoginAt       DateTime?
+  loginCount        Int      @default(0)
+  preferences       Json?    // 用户偏好设置
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Relations
-  sessions ChatSession[]
-  messages Message[]
+  sessions          ChatSession[]
+  messages          Message[]
+  userSettings      UserSettings?
+  userSessions      UserSession[] // 用户登录会话
+  favoriteSessions  FavoriteSession[]
+  sessionTags       SessionTag[]
+  searchHistory     SearchHistory[]
+  apiUsage          ApiUsage[]
 
   @@map("users")
 }
 
+// 聊天会话表
 model ChatSession {
-  id           String   @id @default(cuid())
-  userId       String
-  title        String
-  messageCount Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String   @id @default(cuid())
+  userId            String
+  title             String
+  description       String?
+  messageCount      Int      @default(0)
+  lastMessageAt     DateTime?
+  isArchived        Boolean  @default(false)
+  isFavorite        Boolean  @default(false)
+  isPinned          Boolean  @default(false)
+  aiModel           String?  // 使用的AI模型
+  systemPrompt      String?  // 系统提示词
+  temperature       Float?   // AI参数
+  maxTokens         Int?     // AI参数
+  metadata          Json?    // 扩展元数据
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   // Relations
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages Message[]
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages          Message[]
+  favoriteSessions  FavoriteSession[]
+  sessionTags       SessionTag[]
+  searchHistory     SearchHistory[]
 
   @@map("chat_sessions")
 }
 
+// 消息表
 model Message {
-  id        String   @id @default(cuid())
-  sessionId String
-  userId    String
-  role      MessageRole
-  content   String
-  metadata  Json?
-  createdAt DateTime @default(now())
+  id                String      @id @default(cuid())
+  sessionId         String
+  userId            String
+  role              MessageRole
+  content           String
+  contentType       ContentType @default(TEXT)
+  parentMessageId   String?     // 回复的消息ID
+  isEdited          Boolean     @default(false)
+  editHistory       Json?       // 编辑历史
+  tokenCount        Int?        // 消息token数量
+  processingTime    Int?        // 处理时间(毫秒)
+  metadata          Json?       // 扩展元数据
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 
   // Relations
-  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session           ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentMessage     Message?    @relation("MessageReplies", fields: [parentMessageId], references: [id])
+  replies           Message[]   @relation("MessageReplies")
+  attachments       MessageAttachment[]
 
   @@map("messages")
 }
+
+// 消息附件表
+model MessageAttachment {
+  id          String   @id @default(cuid())
+  messageId   String
+  fileName    String
+  fileType    String
+  fileSize    Int
+  filePath    String
+  mimeType    String?
+  isProcessed Boolean  @default(false)
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("message_attachments")
+}
+
+// ==================== 用户管理表 ====================
+
+// 用户设置表
+model UserSettings {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  theme             String   @default("light") // light, dark, auto
+  language          String   @default("zh-CN")
+  fontSize          Int      @default(14)
+  enableNotifications Boolean @default(true)
+  enableSound       Boolean  @default(true)
+  autoSave          Boolean  @default(true)
+  defaultAiModel    String?  // 默认AI模型
+  apiSettings       Json?    // API设置
+  uiPreferences     Json?    // UI偏好设置
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// 用户登录会话表
+model UserSession {
+  id                String   @id @default(cuid())
+  userId            String
+  sessionToken      String   @unique
+  refreshToken      String?  @unique
+  deviceInfo        Json?    // 设备信息
+  ipAddress         String?
+  userAgent         String?
+  isActive          Boolean  @default(true)
+  expiresAt         DateTime
+  lastActivityAt    DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sessions")
+}
+
+// ==================== 会话管理表 ====================
+
+// 收藏会话表
+model FavoriteSession {
+  id        String   @id @default(cuid())
+  userId    String
+  sessionId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sessionId])
+  @@map("favorite_sessions")
+}
+
+// 会话标签表
+model SessionTag {
+  id        String   @id @default(cuid())
+  userId    String
+  sessionId String
+  tagName   String
+  color     String?  // 标签颜色
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sessionId, tagName])
+  @@map("session_tags")
+}
+
+// 搜索历史表
+model SearchHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  sessionId String?
+  query     String
+  resultCount Int?
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session   ChatSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("search_history")
+}
+
+// ==================== 系统管理表 ====================
+
+// API使用统计表
+model ApiUsage {
+  id                String   @id @default(cuid())
+  userId            String
+  apiProvider       String   // qwen, openai, etc.
+  model             String
+  requestType       String   // chat, completion, etc.
+  promptTokens      Int
+  completionTokens  Int
+  totalTokens       Int
+  cost              Float?   // 成本
+  responseTime      Int      // 响应时间(毫秒)
+  success           Boolean
+  errorMessage      String?
+  createdAt         DateTime @default(now())
+
+  // Relations
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_usage")
+}
+
+// 系统配置表
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("system_config")
+}
+
+// 系统日志表
+model SystemLog {
+  id          String   @id @default(cuid())
+  level       LogLevel
+  category    String
+  message     String
+  context     Json?
+  userId      String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@map("system_logs")
+}
+
+// 数据备份表
+model DataBackup {
+  id          String      @id @default(cuid())
+  type        BackupType
+  fileName    String
+  filePath    String
+  fileSize    Int
+  recordCount Int?
+  status      BackupStatus @default(PENDING)
+  startedAt   DateTime    @default(now())
+  completedAt DateTime?
+  errorMessage String?
+
+  @@map("data_backups")
+}
+
+// ==================== 枚举类型 ====================
 
 enum MessageRole {
   USER
   ASSISTANT
   SYSTEM
+}
+
+enum ContentType {
+  TEXT
+  MARKDOWN
+  CODE
+  IMAGE
+  FILE
+  JSON
+}
+
+enum LogLevel {
+  ERROR
+  WARN
+  INFO
+  DEBUG
+}
+
+enum BackupType {
+  FULL
+  INCREMENTAL
+  USER_DATA
+  SESSIONS
+  MESSAGES
+}
+
+enum BackupStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
 }
