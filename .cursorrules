@@ -87,19 +87,41 @@ packages/
 - Use interceptors for auth, logging, caching
 - Define API response types
 
+### Backend Development
+
+- Follow Controller → Service → Model pattern
+- Use dependency injection for services
+- Implement proper error handling with ApiError class
+- Add input validation for all endpoints
+- Use Swagger decorators for API documentation
+- Follow RESTful API design principles
+
 ### AI Integration
 
-- Use QWEN API for AI responses
-- Implement real-time streaming
-- Maintain conversation context
-- Handle AI service errors gracefully
+- Use QWEN API for all AI responses
+- Implement streaming responses for real-time chat
+- Maintain conversation context across messages
+- Handle AI service errors gracefully with retry logic
+- Cache AI responses when appropriate
+- Implement rate limiting for AI requests
+
+### Database & Caching
+
+- Use Prisma for all database operations
+- Follow repository pattern for data access
+- Use Redis for caching frequently accessed data
+- Implement proper database migrations
+- Use connection pooling for production
+- Follow data validation at model level
 
 ### Testing
 
-- Write unit tests for business logic
-- Test UI components with Testing Library
-- Write integration tests for API and state
-- Test complete user workflows
+- Write unit tests for all business logic
+- Use Jest for testing framework
+- Achieve >80% code coverage
+- Write integration tests for API endpoints
+- Use Testing Library for component tests
+- Mock external dependencies in tests
 
 ### Performance
 
@@ -153,5 +175,6 @@ packages/
 3. Copy `.env.example` to `.env.local`
 4. `pnpm dev`
 5. Check `docs/` folder for detailed guides
+6. Review `docs/cursor-rules/` for additional development guidelines
 
-Remember: This is a cross-platform project with high code reuse. Always consider how changes affect all platforms and maintain consistency.
+Remember: This is a cross-platform project with high code reuse. Always consider how changes affect all platforms and maintain consistency. For detailed backend, AI integration, and testing guidelines, see the supplementary documentation in `docs/cursor-rules/`.
