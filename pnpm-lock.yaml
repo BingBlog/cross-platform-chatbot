@@ -238,6 +238,9 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: ^1.21.0
         version: 1.24.0(react-native@0.72.7)
+      '@react-native-community/cli-platform-android':
+        specifier: ^20.0.2
+        version: 20.0.2
       '@react-navigation/bottom-tabs':
         specifier: ^6.5.11
         version: 6.6.1(@react-navigation/native@6.1.18)(react-native-safe-area-context@4.14.1)(react-native-screens@3.37.0)(react-native@0.72.7)(react@18.2.0)
@@ -3184,6 +3187,15 @@ packages:
       - encoding
     dev: false
 
+  /@react-native-community/cli-config-android@20.0.2:
+    resolution: {integrity: sha512-5yZ2Grr89omnMptV36ilV4EIrRLrIYQAsTTVU/hNI2vL7lz6WB8rPhP5QuovXk3TIjl1Wz2r9A6ZNO2SNJ8nig==}
+    dependencies:
+      '@react-native-community/cli-tools': 20.0.2
+      chalk: 4.1.2
+      fast-glob: 3.3.3
+      fast-xml-parser: 4.5.3
+    dev: false
+
   /@react-native-community/cli-config@11.3.10:
     resolution: {integrity: sha512-YYu14nm1JYLS6mDRBz78+zDdSFudLBFpPkhkOoj4LuBhNForQBIqFFHzQbd9/gcguJxfW3vlYSnudfaUI7oGLg==}
     dependencies:
@@ -3254,6 +3266,16 @@ packages:
       - encoding
     dev: false
 
+  /@react-native-community/cli-platform-android@20.0.2:
+    resolution: {integrity: sha512-Wo2AIkdv3PMEMT4k7QiNm3smNpWK6rd+glVH4Nm6Hco1EgLQ4I9x+gwcS1yN53UHYtq9YnguDCXk2L8duUESDQ==}
+    dependencies:
+      '@react-native-community/cli-config-android': 20.0.2
+      '@react-native-community/cli-tools': 20.0.2
+      chalk: 4.1.2
+      execa: 5.1.1
+      logkitty: 0.7.1
+    dev: false
+
   /@react-native-community/cli-platform-ios@11.3.10:
     resolution: {integrity: sha512-JjduMrBM567/j4Hvjsff77dGSLMA0+p9rr0nShlgnKPcc+0J4TDy0hgWpUceM7OG00AdDjpetAPupz0kkAh4cQ==}
     dependencies:
@@ -3322,6 +3344,21 @@ packages:
       shell-quote: 1.8.3
     transitivePeerDependencies:
       - encoding
+    dev: false
+
+  /@react-native-community/cli-tools@20.0.2:
+    resolution: {integrity: sha512-bPYhRYggW9IIM8pvrZF/0r6HaxCyEWDn6zfPQPMWlkQUwkzFZ8GBY/M7yiHgDzozWKPT4DqZPumrq806Vcksow==}
+    dependencies:
+      '@vscode/sudo-prompt': 9.3.1
+      appdirsjs: 1.2.7
+      chalk: 4.1.2
+      execa: 5.1.1
+      find-up: 5.0.0
+      launch-editor: 2.11.1
+      mime: 2.6.0
+      ora: 5.4.1
+      prompts: 2.4.2
+      semver: 7.7.3
     dev: false
 
   /@react-native-community/cli-types@11.3.10:
@@ -4981,6 +5018,10 @@ packages:
       loupe: 2.3.7
       pretty-format: 29.7.0
     dev: true
+
+  /@vscode/sudo-prompt@9.3.1:
+    resolution: {integrity: sha512-9ORTwwS74VaTn38tNbQhsA5U44zkJfcb0BdTSyyG6frP4e8KMtHuTXYmwefe5dpL8XB1aGSIVTaLjD3BbWb5iA==}
+    dev: false
 
   /@xmldom/xmldom@0.8.11:
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
@@ -9647,6 +9688,13 @@ packages:
     dependencies:
       language-subtag-registry: 0.3.23
     dev: true
+
+  /launch-editor@2.11.1:
+    resolution: {integrity: sha512-SEET7oNfgSaB6Ym0jufAdCeo3meJVeCaaDyzRygy0xsp2BFKCprcfHljTq4QkzTLUxEKkFK6OK4811YM2oSrRg==}
+    dependencies:
+      picocolors: 1.1.1
+      shell-quote: 1.8.3
+    dev: false
 
   /lazy-val@1.0.5:
     resolution: {integrity: sha512-0/BnGCCfyUMkBpeDgWihanIAF9JmZhHBgUhEqzvf+adhNGLoP6TaiI5oF8oyb3I45P+PcnrqihSf01M0l0G5+Q==}
