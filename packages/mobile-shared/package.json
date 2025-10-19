@@ -1,0 +1,26 @@
+{
+  "name": "@chatbot/mobile-shared",
+  "version": "1.0.0",
+  "description": "Shared components and utilities for mobile applications",
+  "main": "index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-native": "^0.72.7"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.6",
+    "typescript": "^4.8.4",
+    "eslint": "^8.19.0"
+  },
+  "keywords": [
+    "react-native",
+    "shared",
+    "components",
+    "utilities"
+  ]
+}

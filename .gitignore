@@ -125,6 +125,17 @@ packages/mobile/ios/Pods/
 packages/mobile/ios/*.xcworkspace/xcuserdata/
 packages/mobile/ios/*.xcodeproj/xcuserdata/
 
+# Expo
+packages/mobile-expo/.expo/
+packages/mobile-expo/android/build/
+packages/mobile-expo/android/.gradle/
+packages/mobile-expo/android/local.properties
+packages/mobile-expo/android/*.iml
+packages/mobile-expo/android/.idea/
+packages/mobile-expo/android/.cxx/
+packages/mobile-expo/android/*.hprof
+packages/mobile-expo/android/*.jsbundle
+
 # Web
 packages/web/dist/
 

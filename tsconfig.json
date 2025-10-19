@@ -31,10 +31,21 @@
   ],
   "exclude": ["node_modules", "dist", "build", "release"],
   "references": [
-    { "path": "./packages/shared" },
-    { "path": "./packages/backend" },
-    { "path": "./packages/web" },
-    { "path": "./packages/desktop" },
-    { "path": "./packages/mobile" }
-  ]
+    {
+      "path": "./packages/shared"
+    },
+    {
+      "path": "./packages/backend"
+    },
+    {
+      "path": "./packages/web"
+    },
+    {
+      "path": "./packages/desktop"
+    },
+    {
+      "path": "./packages/mobile"
+    }
+  ],
+  "extends": "expo/tsconfig.base"
 }
