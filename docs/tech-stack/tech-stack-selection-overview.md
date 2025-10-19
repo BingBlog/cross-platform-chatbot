@@ -42,7 +42,7 @@
 
 ## 核心技术选型
 
-### 1. 跨平台方案：React Native + Electron ⭐⭐⭐⭐⭐
+### 1. 跨平台方案：React Native + Electron + Expo ⭐⭐⭐⭐⭐
 
 **选择理由：**
 
@@ -50,8 +50,11 @@
 - 生态成熟，社区活跃，学习资源丰富
 - 桌面端支持 macOS、Windows、Linux 多平台
 - 符合现代跨平台开发趋势
+- **混合开发策略**：Expo CLI 快速原型 + 原生 RN 性能优化
 
-**详细文档：** [跨平台技术选型文档](./tech-stack/cross-platform-selection.md)
+**详细文档：** 
+- [跨平台技术选型文档](./cross-platform-selection.md)
+- [Expo 开发方式分析文档](./expo-development-analysis.md)
 
 ### 2. 后端服务：Node.js + Koa ⭐⭐⭐⭐⭐
 
@@ -119,15 +122,23 @@
 
 ## 开发阶段规划
 
-### 第一阶段：核心功能开发
+### 第一阶段：快速原型开发 (Expo CLI)
 
-- React Native 跨平台基础框架搭建
+- **Expo CLI 环境搭建**：零配置快速启动
+- **聊天界面原型**：快速验证 UI/UX 设计
+- **基础聊天功能**：实现消息发送和接收
+- **跨平台测试**：同时支持 Android/iOS 预览
+- **功能迭代**：快速验证和调整功能需求
+
+### 第二阶段：核心功能开发 (原生 RN)
+
+- React Native 原生环境配置
 - 共享代码层架构设计
 - 后端 API 基础架构
-- 基础聊天功能实现
+- 性能优化和原生功能集成
 - 平台特定适配层开发
 
-### 第二阶段：功能完善
+### 第三阶段：功能完善
 
 - 会话管理功能
 - 用户认证系统
@@ -135,7 +146,7 @@
 - 数据同步功能
 - 跨平台 UI 组件库
 
-### 第三阶段：高级功能
+### 第四阶段：高级功能
 
 - AI 模型配置
 - 智能功能集成
@@ -152,6 +163,7 @@
 - **框架**: React Native
 - **包管理**: pnpm
 - **构建工具**: Metro / Flipper
+- **开发环境**: Expo CLI (快速原型) + 原生 RN (生产环境)
 
 ### 桌面端扩展
 
@@ -296,9 +308,10 @@
 
 ## 详细文档链接
 
-- [跨平台技术选型详细文档](./tech-stack/cross-platform-selection.md)
-- [后端技术选型详细文档](./tech-stack/backend-selection.md)
-- [数据库技术选型详细文档](./tech-stack/database-selection.md)
-- [AI 集成技术选型详细文档](./tech-stack/ai-integration-selection.md)
-- [Joplin 项目技术选型对比分析](./tech-stack/joplin-comparison-analysis.md)
-- [技术选型最终对比总结](./tech-stack/tech-stack-final-comparison.md)
+- [跨平台技术选型详细文档](./cross-platform-selection.md)
+- [Expo 开发方式分析文档](./expo-development-analysis.md)
+- [后端技术选型详细文档](./backend-selection.md)
+- [数据库技术选型详细文档](./database-selection.md)
+- [AI 集成技术选型详细文档](./ai-integration-selection.md)
+- [Joplin 项目技术选型对比分析](./joplin-comparison-analysis.md)
+- [技术选型最终对比总结](./tech-stack-final-comparison.md)
