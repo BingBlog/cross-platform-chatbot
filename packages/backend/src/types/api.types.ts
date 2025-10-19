@@ -1,5 +1,5 @@
-// 从共享包导入基础类型
-export * from '../../../shared/src/types';
+// 导出ApiError类
+export { ApiError } from '../utils/ApiError';
 
 // ==================== 后端特定类型 ====================
 
@@ -46,7 +46,7 @@ export interface DatabaseQueryOptions {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   search?: string;
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   include?: Record<string, boolean>;
 }
 
@@ -64,13 +64,13 @@ export interface LogContext {
   requestId?: string;
   ipAddress?: string;
   userAgent?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // 中间件配置
 export interface MiddlewareConfig {
   enabled: boolean;
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 }
 
 // 服务配置
@@ -158,7 +158,7 @@ export interface ErrorDetails {
   code: string;
   message: string;
   stack?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   timestamp: Date;
   requestId?: string;
   userId?: string;
@@ -169,7 +169,7 @@ export interface ValidationRule {
   field: string;
   rules: Array<{
     type: 'required' | 'email' | 'min' | 'max' | 'pattern' | 'custom';
-    value?: any;
+    value?: unknown;
     message: string;
   }>;
 }

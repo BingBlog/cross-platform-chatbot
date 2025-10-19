@@ -3,6 +3,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
+    "types": ["jest", "node"],
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "./dist",
@@ -20,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "prisma/**/*", "scripts/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  "include": ["src/**/*", "prisma/**/*", "scripts/**/*", "jest.setup.ts"],
+  "exclude": ["node_modules", "dist"]
 }
