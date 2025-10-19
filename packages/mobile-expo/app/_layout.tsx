@@ -9,6 +9,11 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
+// 在开发环境中加载调试助手
+if (__DEV__ && typeof window !== 'undefined') {
+  import('@/lib/debug-helpers');
+}
+
 export const unstable_settings = {
   anchor: '(tabs)',
 };
