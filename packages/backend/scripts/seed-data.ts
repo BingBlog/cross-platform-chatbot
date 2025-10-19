@@ -199,7 +199,7 @@ async function seed() {
 
     // 创建用户
     console.log('👥 创建用户...');
-    const createdUsers = [];
+    const createdUsers: any[] = [];
     for (const userData of seedData.users) {
       const hashedPassword = await bcrypt.hash(userData.password, 12);
       const user = await prisma.user.create({

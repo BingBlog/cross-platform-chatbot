@@ -22,13 +22,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx scripts/seed-data.ts",
-    "db:reset": "prisma migrate reset",
-    "db:init": "tsx scripts/init-db.ts",
-    "db:backup": "tsx scripts/migrate.ts backup",
-    "db:status": "tsx scripts/migrate.ts status",
-    "db:check": "tsx scripts/migrate.ts check",
-    "db:validate": "tsx scripts/migrate.ts validate",
-    "db:fix": "tsx scripts/migrate.ts fix"
+    "db:reset": "prisma migrate reset"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
