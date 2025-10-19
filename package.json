@@ -40,6 +40,8 @@
     "db:reset": "pnpm --filter backend db:reset"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@react-native/eslint-config": "^0.72.2",
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
