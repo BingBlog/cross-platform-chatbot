@@ -23,12 +23,21 @@ const prisma = new PrismaClient();
 app.use(cspMiddleware());
 
 // CORS configuration
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:8081',
+];
+
 app.use(
   cors({
-    origin:
-      process.env.ALLOWED_ORIGINS ||
-      'http://localhost:3000,http://localhost:5173',
+    origin: ctx => {
+      const origin = ctx.get('Origin');
+      return allowedOrigins.includes(origin) ? origin : false;
+    },
     credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
   })
 );
 
